@@ -16,11 +16,21 @@ const fieldSchema = new mongoose.Schema({
   buttonText: { type: String }, 
 });
 
+const pageSchema = new mongoose.Schema({
+  fields: [fieldSchema], // Fields specific to the page
+  title: { type: String, default: "Untitled Page" }, // Page title
+});
+
 const formSchema = new mongoose.Schema({
   templateId: { type: mongoose.Schema.Types.ObjectId, ref: 'Template', required: true },
-  fields: [fieldSchema],
+  formName:{type:String,default:"untiled Form"},
+  pages: [pageSchema],
   heading: { type: String, default: "Form Preview" }, // New field for form heading
   submitLabel: { type: String, default: "Submit" }, 
+  validatePerPage: {
+    type: Boolean,
+    default: true
+  }
 });
 
 export default mongoose.model('Form', formSchema);

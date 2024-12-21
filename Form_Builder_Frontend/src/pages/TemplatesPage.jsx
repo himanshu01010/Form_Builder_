@@ -45,6 +45,7 @@ const TemplatesPage = () => {
     navigate(`/form-builder/${templateId}`);
   };
 
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-6">Site Survey Forms</h1>

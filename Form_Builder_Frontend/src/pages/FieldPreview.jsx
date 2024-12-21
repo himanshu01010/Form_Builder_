@@ -1,4 +1,4 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from "react-modal";
 import axios from "../api/axios";
 
@@ -23,56 +23,75 @@ const FieldPreview = ({ fields, onFieldClick, templateId }) => {
   const [submitLabel, setSubmitLabel] = useState("submit");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editType, setEditType] = useState(null);
+  const [validatePerPage, setValidatePerPage] = useState(true); // Added validation preference
+
+  console.log(templateId);
 
   const getTemplateHeading = async () => {
     try {
       const response = await axios.get(`/forms/${templateId}`);
       setHeading(response.data.heading || "Form Preview");
       setSubmitLabel(response.data.submitLabel || "Submit");
+      setValidatePerPage(response.data.validatePerPage ?? true); // Get validation preference
     } catch (error) {
       console.error("Error fetching heading and submit label:", error);
     }
   };
 
   // Save changes to backend
-  const saveToBackend = async (newHeading, newSubmitLabel) => {
+  const saveToBackend = async (newHeading, newSubmitLabel, newValidatePerPage) => {
     try {
-      const payload = { heading: newHeading, submitLabel: newSubmitLabel };
+      const payload = { 
+        heading: newHeading, 
+        submitLabel: newSubmitLabel,
+        validatePerPage: newValidatePerPage // Add validation preference to payload
+      };
       await axios.post(`/forms/${templateId}`, payload);
-      console.log("Heading and submit label updated successfully!");
+      console.log("Form settings updated successfully!");
     } catch (error) {
-      console.error("Error updating heading and submit label:", error);
+      console.error("Error updating form settings:", error);
     }
   };
 
-  // Fetch data on mount
   useEffect(() => {
     getTemplateHeading();
   }, [templateId]);
 
-  // Open modal to edit
   const openModal = (type) => {
     setEditType(type);
     setIsModalOpen(true);
   };
 
-  // Save handler for modal
   const handleSave = () => {
-    saveToBackend(heading, submitLabel);
+    saveToBackend(heading, submitLabel, validatePerPage);
     setIsModalOpen(false);
   };
 
   return (
     <div>
-      {/* Editable Form Heading */}
-      <h2
-        className="text-lg font-bold mb-4 cursor-pointer"
-        onClick={() => openModal("heading")}
-      >
-        {heading}
-      </h2>
+      <div className="mb-4 flex justify-between items-center">
+        <h2
+          className="text-lg font-bold cursor-pointer"
+          onClick={() => openModal("heading")}
+        >
+          {heading}
+        </h2>
+        
+        {/* Added validation preference toggle */}
+        <label className="flex items-center space-x-2 text-sm">
+          <input
+            type="checkbox"
+            checked={validatePerPage}
+            onChange={(e) => {
+              setValidatePerPage(e.target.checked);
+              saveToBackend(heading, submitLabel, e.target.checked);
+            }}
+            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+          />
+          <span>Validate each page before proceeding</span>
+        </label>
+      </div>
 
-      {/* Field List */}
       {fields.map((field, index) => (
         <div
           key={field.id}
@@ -95,7 +114,6 @@ const FieldPreview = ({ fields, onFieldClick, templateId }) => {
         <div className="text-center text-gray-500 py-8">Drag and drop fields here</div>
       )}
 
-      {/* Editable Submit Button */}
       <div className="text-center mt-8">
         <button
           className="bg-green-500 text-white px-6 py-2 rounded cursor-pointer"
@@ -105,7 +123,6 @@ const FieldPreview = ({ fields, onFieldClick, templateId }) => {
         </button>
       </div>
 
-      {/* Edit Modal */}
       {isModalOpen && (
         <Modal
           isOpen={isModalOpen}

@@ -53,7 +53,6 @@ const TextFieldEditor = ({ field, onSave, onDelete }) => {
   const handleSave = () => {
     if (!error) {
       const updatedField = {
-        // id: field.id,
         label,
         type, 
         defaultValue,
@@ -62,7 +61,7 @@ const TextFieldEditor = ({ field, onSave, onDelete }) => {
         visible,
       };
 
-      // console.log("Saving field:", updatedField);
+      
       onSave(updatedField);
     }
   };
